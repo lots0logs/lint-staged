@@ -8,6 +8,7 @@ const makeCmdTasks = require('./makeCmdTasks')
 const generateTasks = require('./generateTasks')
 const resolveGitDir = require('./resolveGitDir')
 const git = require('./gitWorkflow')
+const fs = require('fs')
 
 const debug = require('debug')('lint-staged:run')
 
@@ -23,7 +24,7 @@ module.exports = function runAll(config) {
     throw new Error('Invalid config provided to runAll! Use getConfig instead.')
   }
 
-  const { concurrent, renderer, chunkSize, subTaskConcurrency } = config
+  const { concurrent, renderer, chunkSize, subTaskConcurrency, requirePragma } = config
   const gitDir = resolveGitDir()
   debug('Resolved git directory to be `%s`', gitDir)
 
@@ -32,6 +33,14 @@ module.exports = function runAll(config) {
     /* files is an Object{ filename: String, status: String } */
     const filenames = files.map(file => file.filename)
     debug('Loaded list of staged files in git:\n%O', filenames)
+    
+    if (config.requirePragma) {
+      // Remove files that don't include @format marker.
+      filenames.filter(file => {
+        const content = fs.readFileSync(file, 'utf-8')
+        return content.includes('* @format')
+      })
+    }
 
     const tasks = generateTasks(config, filenames).map(task => ({
       title: `Running tasks for ${task.pattern}`,
