@@ -18,7 +18,7 @@ const debug = require('debug')('lint-staged:cfg')
 /**
  * Default config object
  *
- * @type {{concurrent: boolean, chunkSize: number, globOptions: {matchBase: boolean, dot: boolean}, linters: {}, subTaskConcurrency: number, renderer: string}}
+ * @type {{concurrent: boolean, chunkSize: number, globOptions: {matchBase: boolean, dot: boolean}, linters: {}, subTaskConcurrency: number, renderer: string, relative: boolean, requirePragma: boolean}}
  */
 const defaultConfig = {
   concurrent: true,
@@ -31,7 +31,8 @@ const defaultConfig = {
   ignore: [],
   subTaskConcurrency: 1,
   renderer: 'update',
-  relative: false
+  relative: false,
+  requirePragma: false,
 }
 
 /**
@@ -61,7 +62,8 @@ const schema = yup.object().shape({
       "Should be 'update', 'verbose' or a function.",
       value => value === 'update' || value === 'verbose' || isFunction(value)
     ),
-  relative: yup.boolean().default(defaultConfig.relative)
+  relative: yup.boolean().default(defaultConfig.relative),
+  requirePragma: yup.boolean().default(defaultConfig.requirePragma),
 })
 
 /**
